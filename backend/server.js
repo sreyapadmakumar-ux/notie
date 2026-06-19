@@ -4,74 +4,47 @@ const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-// Import routes
 const notesRoutes = require('./routes/notes');
 
-// Initialize Express app
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-/**
- * Middleware
- */
-// Enable CORS for frontend communication
+// Middleware
 app.use(cors());
-
-// Parse JSON request bodies
 app.use(express.json());
-
-// Parse URL-encoded request bodies
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files from frontend folder
+// Serve static frontend files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-/**
- * API Routes
- */
+// API Routes
 app.use('/api/notes', notesRoutes);
 
-/**
- * Health check endpoint
- */
+// Health check
 app.get('/api/health', (req, res) => {
-  res.json({
-    success: true,
-    message: 'Notie API is running',
-    timestamp: new Date().toISOString(),
-  });
+  res.json({ success: true, message: 'Notie API is running', timestamp: new Date().toISOString() });
 });
 
-/**
- * Serve frontend for any non-API routes
- */
+// Serve frontend for non-API routes
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-/**
- * Global error handling middleware
- */
+// Error handler
 app.use((err, req, res, next) => {
-  console.error('Unhandled Error:', err.stack);
-  res.status(500).json({
-    success: false,
-    message: 'Something went wrong!',
-    error: process.env.NODE_ENV === 'development' ? err.message : undefined,
-  });
+  console.error('Error:', err.stack);
+  res.status(500).json({ success: false, message: 'Something went wrong!' });
 });
 
-/**
- * Connect to MongoDB and start server
- */
+// Connect to MongoDB and start
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/notie';
+
 mongoose
-  .connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/notie')
+  .connect(MONGODB_URI)
   .then(() => {
     console.log('Connected to MongoDB');
-    // Listen on 0.0.0.0 so the app is accessible from other devices on the network
     app.listen(PORT, '0.0.0.0', () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-      console.log(`API available at http://localhost:${PORT}/api/notes`);
+      console.log(`Server running on port ${PORT}`);
     });
   })
   .catch((err) => {
