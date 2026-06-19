@@ -5,7 +5,9 @@
  */
 
 // ===== Configuration =====
-const API_URL = `${window.location.origin}/api/notes`;
+const API_URL = window.location.hostname === 'sreyapadmakumar-ux.github.io'
+  ? 'https://notie-uwa4.onrender.com/api/notes'
+  : `${window.location.origin}/api/notes`;
 
 // ===== State Management =====
 let notes = [];
