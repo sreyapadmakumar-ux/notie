@@ -7,7 +7,7 @@
 // ===== localStorage Data Layer =====
 function getNotes() {
   try { return JSON.parse(localStorage.getItem('notie-notes') || '[]'); }
-  catch { return []; }
+  catch(e) { return []; }
 }
 
 function saveNotes(notes) {
@@ -208,8 +208,8 @@ function renderNotes() {
     });
     card.querySelector('.btn-pin-card').addEventListener('click', e => {
       e.stopPropagation();
-      togglePin(note._id);
-      toast(`Note ${togglePin(note._id) ? 'pinned' : 'unpinned'}!`, 'success');
+      const pinned = togglePin(note._id);
+      toast(`Note ${pinned ? 'pinned' : 'unpinned'}!`, 'success');
       fetchNotes();
     });
     card.querySelector('.btn-delete-card').addEventListener('click', e => {
