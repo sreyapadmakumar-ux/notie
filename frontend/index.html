@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notie - Notes Management</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&family=Fira+Code:wght@400;500&family=Dancing+Script:wght@400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <!-- Toast Notification Container -->
+  <div id="toast-container"></div>
+
+  <!-- Main App Container -->
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <h1 class="logo">
+          <span class="logo-icon">&#128221;</span> Notie
+        </h1>
+        <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle Sidebar">
+          &#9776;
+        </button>
+      </div>
+
+      <!-- New Note Button -->
+      <button class="btn-new-note" id="btn-new-note">
+        <span class="plus-icon">+</span>
+        <span class="btn-text">New Note</span>
+      </button>
+
+      <!-- Quick Stats -->
+      <div class="quick-stats">
+        <div class="stat-item">
+          <span class="stat-icon">&#128221;</span>
+          <span class="stat-value" id="stat-total">0</span>
+          <span class="stat-label">Total</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-icon">&#128204;</span>
+          <span class="stat-value" id="stat-pinned">0</span>
+          <span class="stat-label">Pinned</span>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <input
+          type="text"
+          id="search-input"
+          class="search-input"
+          placeholder="Search notes..."
+        />
+        <span class="search-icon">&#128269;</span>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <label class="filter-label">Categories</label>
+        <div id="category-list" class="category-list">
+          <button class="category-btn active" data-category="All">All</button>
+        </div>
+      </div>
+
+      <!-- Recent Notes -->
+      <div class="recent-notes">
+        <div class="recent-header">
+          <label class="filter-label">Recent Notes</label>
+          <button class="btn-view-all" id="btn-view-all">View All</button>
+        </div>
+        <div id="recent-list" class="recent-list">
+          <div class="recent-empty">
+            <span>&#128221;</span>
+            <p>No recent notes</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar Footer -->
+      <div class="sidebar-footer">
+        <button class="btn-icon theme-toggle" id="btn-toggle-theme" title="Toggle Theme">
+          <span id="theme-icon">&#9790;</span>
+        </button>
+        <span class="note-count" id="note-count">0 notes</span>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+      <!-- Notes Grid Section -->
+      <section class="notes-section" id="notes-section">
+        <div class="notes-header">
+          <h2 class="section-title">All Notes</h2>
+          <div class="view-toggle">
+            <button class="view-btn active" data-view="grid" title="Grid View">&#9783;</button>
+            <button class="view-btn" data-view="list" title="List View">&#9776;</button>
+          </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+          <div class="spinner"></div>
+          <p>Loading notes...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="empty-state" style="display: none;">
+          <div class="empty-icon">&#128221;</div>
+          <h3>No notes yet</h3>
+          <p>Create your first note to get started!</p>
+          <button class="btn-new-note" id="btn-empty-new">
+            <span>+</span> Create Note
+          </button>
+        </div>
+
+        <!-- No Results State -->
+        <div class="empty-state" id="no-results" style="display: none;">
+          <div class="empty-icon">&#128269;</div>
+          <h3>No matching notes</h3>
+          <p>Try a different search term or category.</p>
+        </div>
+
+        <!-- Notes Grid -->
+        <div class="notes-grid" id="notes-grid"></div>
+      </section>
+
+      <!-- Note Detail/View Panel -->
+      <section class="note-view" id="note-view" style="display: none;">
+        <div class="note-view-header">
+          <button class="btn-back" id="btn-back" title="Back to Notes">&#8592; Back</button>
+          <div class="note-view-actions">
+            <button class="btn-icon btn-pin" id="btn-pin" title="Pin Note">&#128204;</button>
+            <button class="btn-icon btn-edit" id="btn-edit" title="Edit Note">&#9998;</button>
+            <button class="btn-icon btn-delete" id="btn-delete" title="Delete Note">&#128465;</button>
+          </div>
+        </div>
+        <div class="note-view-content" id="note-view-content">
+          <div class="note-meta">
+            <span class="note-category" id="view-category"></span>
+            <span class="note-date" id="view-date"></span>
+          </div>
+          <h1 class="note-title" id="view-title"></h1>
+          <div class="note-body" id="view-body"></div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Modal Overlay for Create/Edit -->
+  <div class="modal-overlay" id="modal-overlay" style="display: none;">
+    <div class="modal" id="note-modal">
+      <div class="modal-header">
+        <h2 id="modal-title">New Note</h2>
+        <button class="btn-close" id="btn-close-modal">&times;</button>
+      </div>
+      <form id="note-form">
+        <div class="form-group">
+          <label for="input-title">Title</label>
+          <input type="text" id="input-title" placeholder="Enter note title..." required maxlength="100" />
+        </div>
+        <div class="form-group">
+          <label for="input-content">Content</label>
+          <textarea id="input-content" placeholder="Write your note here..." required maxlength="5000" rows="8"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="input-category">Category</label>
+            <input type="text" id="input-category" placeholder="e.g. Work, Personal..." maxlength="30" value="General" />
+          </div>
+          <div class="form-group">
+            <label for="input-font">Font Style</label>
+            <select id="input-font">
+              <option value="default">Default</option>
+              <option value="serif">Serif</option>
+              <option value="mono">Monospace</option>
+              <option value="cursive">Cursive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Note Color</label>
+          <div class="color-picker">
+            <button type="button" class="color-option active" data-color="#1e1e2e" style="background:#1e1e2e;"></button>
+            <button type="button" class="color-option" data-color="#2d1b4e" style="background:#2d1b4e;"></button>
+            <button type="button" class="color-option" data-color="#1b3a4e" style="background:#1b3a4e;"></button>
+            <button type="button" class="color-option" data-color="#1b4e2d" style="background:#1b4e2d;"></button>
+            <button type="button" class="color-option" data-color="#4e1b1b" style="background:#4e1b1b;"></button>
+            <button type="button" class="color-option" data-color="#4e3d1b" style="background:#4e3d1b;"></button>
+            <button type="button" class="color-option" data-color="#1b2d4e" style="background:#1b2d4e;"></button>
+            <button type="button" class="color-option" data-color="#3d1b4e" style="background:#3d1b4e;"></button>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-cancel" id="btn-cancel">Cancel</button>
+          <button type="submit" class="btn-save" id="btn-save">
+            <span id="save-text">Save Note</span>
+            <div class="btn-spinner" id="save-spinner" style="display: none;"></div>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
